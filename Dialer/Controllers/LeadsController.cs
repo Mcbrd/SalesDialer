@@ -11,28 +11,28 @@ using Dialer.Models.Salesforce;
 using Dialer.Salesforce;
 namespace Dialer.Controllers
 {
-    public class ContactsController : Controller
+    public class LeadsController : Controller
     {
         // Note: the SOQL Field list, and Binding Property list have subtle differences as custom properties may be mapped with the JsonProperty attribute to remove __c
-        const string _ContactsPostBinding = "Id,Salutation,FirstName,LastName,MailingStreet,MailingCity,MailingState,MailingPostalCode,MailingCountry,Phone,Email";
+        const string _LeadPostBinding = "ID,LastName,FirstName,Company,City,State,MobilePhone,Phone,Email"; // Lead ID really ID?
         // GET: Contacts
         public async Task<ActionResult> Index()
         {
-            IEnumerable<Contact> selectedContacts = Enumerable.Empty<Contact>();
+            IEnumerable<Lead> selectedLeads = Enumerable.Empty<Lead>();
             try
             {
-                selectedContacts = await SalesforceService.MakeAuthenticatedClientRequestAsync(
+                selectedLeads = await SalesforceService.MakeAuthenticatedClientRequestAsync(
                     async (client) =>
                     {
-                        QueryResult<Contact> contacts =
-                            await client.QueryAsync<Contact>("SELECT Id, Phone, FirstName, LastName, MailingCity, MailingState, MailingCountry From Contact");
-                        return contacts.Records;
+                        QueryResult<Lead> lead =
+                            await client.QueryAsync<Lead>("ID, Last Name, First Name, Company, City, State, MobilePhone ,Phone, Email From Lead"); // Leads? all over
+                        return lead.Records;
                     }
                     );
             }
             catch (Exception e)
             {
-                this.ViewBag.OperationName = "query Salesforce Contacts";
+                this.ViewBag.OperationName = "query Salesforce Lead"; //Leads?
                 this.ViewBag.AuthorizationUrl = SalesforceOAuthRedirectHandler.GetAuthorizationUrl(this.Request.Url.ToString());
                 this.ViewBag.ErrorMessage = e.Message;
             }
@@ -40,26 +40,26 @@ namespace Dialer.Controllers
             {
                 return Redirect(this.ViewBag.AuthorizationUrl);
             }
-            return View(selectedContacts);
+            return View(selectedLeads);
         }
 
         public async Task<ActionResult> Details(string id)
         {
-            IEnumerable<Contact> selectedContacts = Enumerable.Empty<Contact>();
+            IEnumerable<Lead> selectedLeads = Enumerable.Empty<Lead>();
             try
             {
-                selectedContacts = await SalesforceService.MakeAuthenticatedClientRequestAsync(
+                selectedLeads = await SalesforceService.MakeAuthenticatedClientRequestAsync(
                     async (client) =>
                     {
-                        QueryResult<Contact> contacts =
-                            await client.QueryAsync<Contact>("SELECT Id, Phone, FirstName, LastName, MailingStreet, MailingCity, MailingState, MailingPostalCode, MailingCountry, Phone, Email From Contact Where Id = '" + id + "'");
-                        return contacts.Records;
+                        QueryResult<Lead> leads =
+                            await client.QueryAsync<Lead>("SELECT ID, Last Name, First Name, Company, City, State, MobilePhone ,Phone, Email From Lead Where Lead Id = '" + id + "'");
+                        return leads.Records;
                     }
                     );
             }
             catch (Exception e)
             {
-                this.ViewBag.OperationName = "Salesforce Contacts Details";
+                this.ViewBag.OperationName = "Salesforce Lead Details";
                 this.ViewBag.AuthorizationUrl = SalesforceOAuthRedirectHandler.GetAuthorizationUrl(this.Request.Url.ToString());
                 this.ViewBag.ErrorMessage = e.Message;
             }
@@ -67,26 +67,26 @@ namespace Dialer.Controllers
             {
                 return Redirect(this.ViewBag.AuthorizationUrl);
             }
-            return View(selectedContacts.FirstOrDefault());
+            return View(selectedLeads.FirstOrDefault());
         }
 
         public async Task<ActionResult> Edit(string id)
         {
-            IEnumerable<Contact> selectedContacts = Enumerable.Empty<Contact>();
+            IEnumerable<Lead> selectedLeads = Enumerable.Empty<Lead>();
             try
             {
-                selectedContacts = await SalesforceService.MakeAuthenticatedClientRequestAsync(
+                selectedLeads = await SalesforceService.MakeAuthenticatedClientRequestAsync(
                     async (client) =>
                     {
-                        QueryResult<Contact> contacts =
-                            await client.QueryAsync<Contact>("SELECT Id, Phone, FirstName, LastName, MailingStreet, MailingCity, MailingState, MailingPostalCode, MailingCountry, Phone, Email From Contact Where Id= '" + id + "'");
-                        return contacts.Records;
+                        QueryResult<Lead> lead =
+                            await client.QueryAsync<Lead>("SELECT ID, Last Name, First Name, Company, City, State, MobilePhone ,Phone, Email From Lead Where Lead Id= '" + id + "'");
+                        return lead.Records;
                     }
                     );
             }
             catch (Exception e)
             {
-                this.ViewBag.OperationName = "Edit Salesforce Contacts";
+                this.ViewBag.OperationName = "Edit Salesforce Leads";
                 this.ViewBag.AuthorizationUrl = SalesforceOAuthRedirectHandler.GetAuthorizationUrl(this.Request.Url.ToString());
                 this.ViewBag.ErrorMessage = e.Message;
             }
@@ -94,12 +94,12 @@ namespace Dialer.Controllers
             {
                 return Redirect(this.ViewBag.AuthorizationUrl);
             }
-            return View(selectedContacts.FirstOrDefault());
+            return View(selectedLeads.FirstOrDefault());
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit([Bind(Include = _ContactsPostBinding)] Contact contact)
+        public async Task<ActionResult> Edit([Bind(Include = _LeadPostBinding)] Lead lead)
         {
             SuccessResponse success = new SuccessResponse();
             try
@@ -107,14 +107,14 @@ namespace Dialer.Controllers
                 success = await SalesforceService.MakeAuthenticatedClientRequestAsync(
                     async (client) =>
                     {
-                        success = await client.UpdateAsync("Contact", contact.Id, contact);
+                        success = await client.UpdateAsync("Lead", lead.Id, lead);
                         return success;
                     }
                     );
             }
             catch (Exception e)
             {
-                this.ViewBag.OperationName = "Edit Salesforce Contact";
+                this.ViewBag.OperationName = "Edit Salesforce Lead";
                 this.ViewBag.AuthorizationUrl = SalesforceOAuthRedirectHandler.GetAuthorizationUrl(this.Request.Url.ToString());
                 this.ViewBag.ErrorMessage = e.Message;
             }
@@ -128,7 +128,7 @@ namespace Dialer.Controllers
             }
             else
             {
-                return View(contact);
+                return View(lead);
             }
         }
 
@@ -138,22 +138,22 @@ namespace Dialer.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            IEnumerable<Contact> selectedContacts = Enumerable.Empty<Contact>();
+            IEnumerable<Lead> selectedLead = Enumerable.Empty<Lead>();
             try
             {
-                selectedContacts = await SalesforceService.MakeAuthenticatedClientRequestAsync(
+                selectedLead = await SalesforceService.MakeAuthenticatedClientRequestAsync(
                 async (client) =>
                 {
                     // Query the properties you'll display for the user to confirm they wish to delete this Contact
-                    QueryResult<Contact> contacts =
-                        await client.QueryAsync<Contact>(string.Format("SELECT Id, FirstName, LastName, MailingCity, MailingState, MailingCountry From Contact Where Id='{0}'", id));
-                    return contacts.Records;
+                    QueryResult<Lead> lead =
+                        await client.QueryAsync<Lead>(string.Format("SELECT Lead ID, Last Name, First Name, Company, City, State, MobilePhone ,Phone, Email From Lead Where Lead Id='{0}'", id));
+                    return lead.Records;
                 }
                 );
             }
             catch (Exception e)
             {
-                this.ViewBag.OperationName = "query Salesforce Contacts";
+                this.ViewBag.OperationName = "query Salesforce Leads";
                 this.ViewBag.AuthorizationUrl = SalesforceOAuthRedirectHandler.GetAuthorizationUrl(this.Request.Url.ToString());
                 this.ViewBag.ErrorMessage = e.Message;
             }
@@ -161,13 +161,13 @@ namespace Dialer.Controllers
             {
                 return Redirect(this.ViewBag.AuthorizationUrl);
             }
-            if (selectedContacts.Count() == 0)
+            if (selectedLead.Count() == 0)
             {
                 return View();
             }
             else
             {
-                return View(selectedContacts.FirstOrDefault());
+                return View(selectedLead.FirstOrDefault());
             }
         }
 
@@ -188,7 +188,7 @@ namespace Dialer.Controllers
             }
             catch (Exception e)
             {
-                this.ViewBag.OperationName = "Delete Salesforce Contacts";
+                this.ViewBag.OperationName = "Delete Salesforce Leads";
                 this.ViewBag.AuthorizationUrl = SalesforceOAuthRedirectHandler.GetAuthorizationUrl(this.Request.Url.ToString());
                 this.ViewBag.ErrorMessage = e.Message;
             }
@@ -213,7 +213,7 @@ namespace Dialer.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create([Bind(Include = _ContactsPostBinding)] Contact contact)
+        public async Task<ActionResult> Create([Bind(Include = _LeadPostBinding)] Lead lead)
         {
             String id = String.Empty;
             try
@@ -221,13 +221,13 @@ namespace Dialer.Controllers
                 id = await SalesforceService.MakeAuthenticatedClientRequestAsync(
                     async (client) =>
                     {
-                        return await client.CreateAsync("Contact", contact);
+                        return await client.CreateAsync("Lead", lead);
                     }
                     );
             }
             catch (Exception e)
             {
-                this.ViewBag.OperationName = "Create Salesforce Contact";
+                this.ViewBag.OperationName = "Create Salesforce Lead";
                 this.ViewBag.AuthorizationUrl = SalesforceOAuthRedirectHandler.GetAuthorizationUrl(this.Request.Url.ToString());
                 this.ViewBag.ErrorMessage = e.Message;
             }
@@ -241,7 +241,7 @@ namespace Dialer.Controllers
             }
             else
             {
-                return View(contact);
+                return View(lead);
             }
         }
     }
