@@ -39,6 +39,7 @@
             @Html.DisplayFor(model => model.MailingCountry)
         </dd>
     </dl>
+
     @using (Html.BeginForm())
     {
         @Html.AntiForgeryToken()
@@ -46,4 +47,7 @@
             <input type="submit" value="Delete" class="btn btn-default" /> |
             @Html.ActionLink("Back to List", "Index")
         </div>
+
     }
+</div>
+

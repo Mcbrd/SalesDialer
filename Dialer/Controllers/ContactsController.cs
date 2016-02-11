@@ -9,6 +9,9 @@ using System.Web;
 using System.Web.Mvc;
 using Dialer.Models.Salesforce;
 using Dialer.Salesforce;
+using Twilio;
+using TropoCSharp;
+
 namespace Dialer.Controllers
 {
     public class ContactsController : Controller
@@ -18,6 +21,7 @@ namespace Dialer.Controllers
         // GET: Contacts
         public async Task<ActionResult> Index()
         {
+
             IEnumerable<Contact> selectedContacts = Enumerable.Empty<Contact>();
             try
             {
