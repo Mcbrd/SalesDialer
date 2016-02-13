@@ -9,39 +9,81 @@ using System.Web;
 using System.Web.Mvc;
 using Dialer.Models.Salesforce;
 using Dialer.Salesforce;
+using Dialer.Models;
+using Microsoft.AspNet.Identity;
+
 namespace Dialer.Controllers
 {
+    
     public class LeadsController : Controller
     {
         // Note: the SOQL Field list, and Binding Property list have subtle differences as custom properties may be mapped with the JsonProperty attribute to remove __c
-        const string _LeadPostBinding = "ID,LastName,FirstName,Company,City,State,MobilePhone,Phone,Email"; // Lead ID really ID?
+        const string _LeadPostBinding = "Lead ID,LastName,FirstName,Company,City,State,MobilePhone,Phone,Email"; // Lead ID really ID? nothing works
         // GET: Contacts
-        public async Task<ActionResult> Index()
+            [HttpPost, ActionName("send-sms")]
+
+        public ActionResult Index()
         {
-            IEnumerable<Lead> selectedLeads = Enumerable.Empty<Lead>();
-            try
-            {
-                selectedLeads = await SalesforceService.MakeAuthenticatedClientRequestAsync(
-                    async (client) =>
-                    {
-                        QueryResult<Lead> lead =
-                            await client.QueryAsync<Lead>("ID, Last Name, First Name, Company, City, State, MobilePhone ,Phone, Email From Lead"); // Leads? all over
-                        return lead.Records;
-                    }
-                    );
-            }
-            catch (Exception e)
-            {
-                this.ViewBag.OperationName = "query Salesforce Lead"; //Leads?
-                this.ViewBag.AuthorizationUrl = SalesforceOAuthRedirectHandler.GetAuthorizationUrl(this.Request.Url.ToString());
-                this.ViewBag.ErrorMessage = e.Message;
-            }
-            if (this.ViewBag.ErrorMessage == "AuthorizationRequired")
-            {
-                return Redirect(this.ViewBag.AuthorizationUrl);
-            }
-            return View(selectedLeads);
+            SmsService _smsService = new SmsService();
+            SharpGoogleVoice gv = new SharpGoogleVoice("email@gmail.com", "");//enter email
+            gv.SendSMS("+14148408420", "test message");//- change number, just showing format prbly put this somewhere else^ - console app logic? 
+
+            //public ActionResult SendSMS(SMS sms)   - this would be for different text service http://emekaemego.blogspot.com/2010/10/sending-sms-with-aspnet-mvc.html
+            //{
+            //if (ModelState.IsValid)
+            //{
+            //    try
+            //    {
+            //        bool isSuccess = false;
+            //        string errMsg = null;
+            //        string response = _smsService.Send(sms); //Send sms
+
+            //        string code = _smsService.GetResponseMessage(response, out isSuccess, out errMsg);
+
+            //        if (!isSuccess)
+            //        {
+            //            ModelState.AddModelError("", errMsg);
+            //        }
+            //        else
+            //        {
+            //            ViewData["SuccessMsg"] = "Message was successfully sent.";
+            //        }
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        ModelState.AddModelError("", ex.Message);
+            //    }
+            //} End text code
+
+            return View(/*sms*/);
         }
+        //public ActionResult Index()  - this should show Leads just like Contacts page does/replace above code
+
+        //{
+        //IEnumerable<Lead> selectedLeads = Enumerable.Empty<Lead>();
+        //try
+        //{
+        //    selectedLeads = await SalesforceService.MakeAuthenticatedClientRequestAsync(
+        //        async (client) =>
+        //        {
+        //            QueryResult<Lead> lead =
+        //                await client.QueryAsync<Lead>("ID, Last Name, First Name, Company, City, State, MobilePhone ,Phone, Email From Lead"); // Leads? all over
+        //            return lead.Records;
+        //        }
+        //        );
+        //}
+        //catch (Exception e)
+        //{
+        //    this.ViewBag.OperationName = "query Salesforce Lead"; //Leads?
+        //    this.ViewBag.AuthorizationUrl = SalesforceOAuthRedirectHandler.GetAuthorizationUrl(this.Request.Url.ToString());
+        //    this.ViewBag.ErrorMessage = e.Message;
+        //}
+        //if (this.ViewBag.ErrorMessage == "AuthorizationRequired")
+        //{
+        //    return Redirect(this.ViewBag.AuthorizationUrl);
+        //}
+        //return View(selectedLeads);
+
 
         public async Task<ActionResult> Details(string id)
         {

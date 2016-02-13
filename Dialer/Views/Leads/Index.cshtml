@@ -1,30 +1,5 @@
-﻿@using Twilio;
-@{
-    // Set our Account SID and AuthToken
-    string accountSid = "AC123";
-    string authToken = "abcd";
-
-    // A phone number you have previously validated with Twilio
-    string phonenumber = "+14151234567";
-
-    // Instantiate a new Twilio Rest Client
-    var client = new TwilioRestClient(accountSid, authToken);
-
-    // Initiate a new outbound call
-    var call = client.InitiateOutboundCall(
-        phonenumber, // The number of the phone initiating the call
-        "+15101234567", // The number of the phone receiving call
-        "http://demo.twilio.com/welcome/voice/" // The URL Twilio will request when the call is answered
-    );
-
-    if (call.RestException == null)
-    { Response.Write(string.Format("Started call: {0}", call.Sid));
-} else {
-        Response.Write(string.Format("Error: {0}", call.RestException.Message));
-    }
-}
-
-@*@model IEnumerable<Dialer.Models.Salesforce.Lead>
+﻿
+@model IEnumerable<Dialer.Models.Salesforce.Lead>
 
 @{
     ViewBag.Title = "Index";
@@ -240,4 +215,4 @@
         </tr>
     }
 
-</table>*@
+</table>

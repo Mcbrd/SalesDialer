@@ -7,6 +7,7 @@ using Dialer.Models;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
+using System.Text;
 
 namespace Dialer.Controllers
 {
@@ -21,7 +22,47 @@ namespace Dialer.Controllers
         {
             ViewBag.Message = "Make the most of your precious time!";
 
+        
+            var httpWReq =
+                (HttpWebRequest)WebRequest.Create("https://api.tropo.com/v1/sessions");
+
+            var encoding = new ASCIIEncoding();
+            var postDataTemplate = "<session>" +
+                                   "<token>{0}</token>" +
+                                   "<var name=\"numberToDial\" value=\"{1}\"></var>" +
+                                   "<var name=\"msg\" value=\"{2}\"></var>" +
+                                   "</session>";
+
+            var tokenToUse = "564c7674644b434e6c76614f694c5350596c704c6a78706a6f6d634753646d4d505247467248565a6d6f784c";
+            var numberToDial = "phone number"; // enter valid number
+            var message = "Greetings. This is a reminder that you have a service call appointment scheduled.";
+
+            var postData = string.Format(postDataTemplate, tokenToUse, numberToDial, message);
+
+            var data = encoding.GetBytes(postData);
+
+            httpWReq.Method = "POST";
+            httpWReq.Accept = "text/xml";
+            httpWReq.ContentType = "text/xml";
+            httpWReq.ContentLength = data.Length;
+
+            var newStream = httpWReq.GetRequestStream();
+            newStream.Write(data, 0, data.Length);
+            var response = (HttpWebResponse)httpWReq.GetResponse();
+            byte[] buffer = new byte[response.ContentLength];
+            using (var stream = response.GetResponseStream())
+            {
+                stream.Read(buffer, 0, (int)response.ContentLength);
+            }
+            var bufferAsString = buffer.Aggregate("", (current, t) => current + (char)t);
+
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                throw new Exception("Did not get status OK 200 from POST");
+            }
+            newStream.Close();
             return View();
+
         }
 
         public ActionResult Contact()
